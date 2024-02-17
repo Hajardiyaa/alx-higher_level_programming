@@ -1,20 +1,45 @@
 #!/usr/bin/python3
 """
- a script that takes in an argument and displays
- all values in the states table of hbtn_0e_0_usa 
- where name matches the argument.
- """
- import MySQLdb as db
-from sys import argv
+ display the values in"states table" of hbtn_0e_0_usa  when it s a match
+"""
 
-if __name__ == '__main__':
-    db_connect = db.connect(host="localhost", port=3306,
-                            user=argv[1], passwd=argv[2], db=argv[3])
-    db_cursor = db_connect.cursor()
+import MySQLdb
+import sys
 
-    db_cursor.execute(
-        .format(argv[4]))
-    rows_selected = db_cursor.fetchall()
+def filter_states(username: str, password: str, db_name: str, state_name: str):
+    """
+    Connects to the MySQL server and filters states based on the provided state name.
+    
+    Args:
+        username (str)
+        password (str)
+        db_name (str)
+        state_name (str)
+    """
+    db = MySQLdb.connect(
+        host="localhost",
+        port=3306,
+        user=username,
+        passwd=password,
+        db=db_name
+    )
 
-    for row in rows_selected:
+    cur = db.cursor()
+
+    query = "SELECT * FROM states WHERE name = %s ORDER BY id ASC"
+    cur.execute(query, (state_name,))
+
+    for row in cur.fetchall():
         print(row)
+
+    db.close()
+
+if __name__ == "__main__":
+    if len(sys.argv) != 5:
+        print("Usage: {} username password db_name state_name".format(sys.argv[0]))
+        sys.exit(1)
+
+    username, password, db_name, state_name = sys.argv[1:]
+
+    filter_states(username, password, db_name, state_name)
+
